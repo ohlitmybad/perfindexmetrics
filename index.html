@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -598,6 +599,84 @@
       ]
   };
 
+  // Function to convert metric display name to translation key
+  function getMetricTranslationKey(displayName) {
+      const mapping = {
+          "Prevented goals per 90": "prevented_goals_per_90",
+          "Minutes played": "minutes_played",
+          "Save percentage %": "save_percentage",
+          "Clean sheets": "clean_sheets",
+          "Passes completed per 90": "passes_completed_per_90",
+          "Pass completion %": "pass_completion",
+          "Short pass completion %": "short_pass_completion",
+          "Long pass accuracy %": "long_pass_accuracy",
+          "Short passes completed per 90": "short_passes_completed_per_90",
+          "Aerial duels won per 90": "aerial_duels_won_per_90",
+          "Saves per 90": "saves_per_90",
+          "Interceptions (PAdj)": "interceptions_padj",
+          "Defensive duels won per 90": "defensive_duels_won_per_90",
+          "Long passes completed per 90": "long_passes_completed_per_90",
+          "Non-penalty goals per 90": "non_penalty_goals_per_90",
+          "Goals per 90": "goals_per_90",
+          "Goals per 100 touches": "goals_per_100_touches",
+          "xG per 100 touches": "xg_per_100_touches",
+          "Shots per 90": "shots_per_90",
+          "Assists per 90": "assists_per_90",
+          "Key passes per 90": "key_passes_per_90",
+          "npxG per 90": "npxg_per_90",
+          "Shots on target %": "shots_on_target_percentage",
+          "Goal conversion %": "goal_conversion",
+          "Touches in box per 90": "touches_in_box_per_90",
+          "xA per 90": "xa_per_90",
+          "Aerial duels won %": "aerial_duels_won_percentage",
+          "xG per 90": "xg_per_90",
+          "npxG/Shot": "npxg_per_shot",
+          "Progressive carries per 90": "progressive_carries_per_90",
+          "Offensive duels won per 90": "offensive_duels_won_per_90",
+          "Goals - xG per 90": "goals_minus_xg_per_90",
+          "Shots on target per 90": "shots_on_target_per_90",
+          "Duels won per 90": "duels_won_per_90",
+          "Progressive action rate": "progressive_action_rate",
+          "Ball-carrying frequency": "ball_carrying_frequency",
+          "Successful dribbles per 90": "successful_dribbles_per_90",
+          "Accelerations per 90": "accelerations_per_90",
+          "Fouls suffered per 90": "fouls_suffered_per_90",
+          "xA per 100 passes": "xa_per_100_passes",
+          "Chance creation ratio": "chance_creation_ratio",
+          "Accurate crosses per 90": "accurate_crosses_per_90",
+          "Deep completions per 90": "deep_completions_per_90",
+          "Cross accuracy %": "cross_accuracy",
+          "Pass completion (to penalty box) %": "pass_completion_to_penalty_box",
+          "Possession +/-": "possession_plus_minus",
+          "Possessions won - lost per 90": "possessions_won_lost_per_90",
+          "Duels won %": "duels_won_percentage",
+          "Defensive duels won %": "defensive_duels_won_percentage",
+          "Dribble success rate %": "dribble_success_rate",
+          "Offensive duels won %": "offensive_duels_won_percentage",
+          "Forward pass completion %": "forward_pass_completion",
+          "Progressive passes completed per 90": "progressive_passes_completed_per_90",
+          "Forward passes completed per 90": "forward_passes_completed_per_90",
+          "Progressive pass accuracy %": "progressive_pass_accuracy",
+          "Accurate passes to final third per 90": "accurate_passes_to_final_third_per_90",
+          "Touches per 90": "touches_per_90",
+          "Possessions won per 90": "possessions_won_per_90",
+          "Interceptions per 90": "interceptions_per_90",
+          "Forward pass ratio": "forward_pass_ratio",
+          "Accurate passes to penalty box per 90": "accurate_passes_to_penalty_box_per_90",
+          "Through passes completed per 90": "through_passes_completed_per_90",
+          "Progressive passes (PAdj)": "progressive_passes_padj",
+          "Sliding tackles per 90": "sliding_tackles_per_90",
+          "Sliding tackles (PAdj)": "sliding_tackles_padj",
+          "Headed goals per 90": "headed_goals_per_90",
+          "Shot assists per 90": "shot_assists_per_90",
+          "Pre-assists per 90": "pre_assists_per_90",
+          "Pass completion (to final third) %": "pass_completion_to_final_third",
+          "Through pass completion %": "through_pass_completion",
+          "Dribbles per 100 touches": "dribbles_per_100_touches"
+      };
+      return mapping[displayName] || displayName;
+  }
+
   function renderMetrics(position) {
       const metrics = positionData[position];
       const container = document.getElementById(`${position}-metrics`);
@@ -617,7 +696,16 @@
           metricName.className = 'metric-name';
           
           const metricNameText = document.createElement('span');
-          metricNameText.textContent = metric.name;
+          // Try to get translation, fallback to original name
+          const translationKey = getMetricTranslationKey(metric.name);
+          let displayName = metric.name;
+          
+          // Check if we have translations loaded
+          if (window.translations && window.translations.metrics && window.translations.metrics[translationKey]) {
+              displayName = window.translations.metrics[translationKey];
+          }
+          
+          metricNameText.textContent = displayName;
           
           const weightBar = document.createElement('div');
           weightBar.className = 'weight-bar';
@@ -656,11 +744,8 @@
                   targetContent.classList.add('active');
               }
               
-              // Render metrics if not already rendered
-              const metricsContainer = document.getElementById(`${position}-metrics`);
-              if (metricsContainer && !metricsContainer.hasChildNodes()) {
-                  renderMetrics(position);
-              }
+              // Always re-render metrics to ensure translations are applied
+              renderMetrics(position);
           });
       });
 
@@ -672,3 +757,86 @@
       });
   });
   </script>
+
+<script>
+
+    function getPreferredLanguage() {
+      // PRIORITY 1: Check URL parameter first
+      const urlParams = new URLSearchParams(window.location.search);
+      const langParam = urlParams.get('lang');
+      if (langParam) {
+        return langParam;
+      }
+      // PRIORITY 2: Check localStorage
+      const storedLang = localStorage.getItem('preferredLanguage');
+      if (storedLang) {
+        return storedLang;
+      }
+      // PRIORITY 3: Use browser language
+      return getBrowserLanguage() || 'en';
+    }
+  
+    function getBrowserLanguage() {
+      return navigator.language.slice(0, 2);
+    }
+  
+    function applyLanguage(language) {
+      console.log(language);
+  
+      if (language === 'en') {
+        // Clear translations for English
+        window.translations = null;
+        // Re-render all visible metrics
+        const activePosition = document.querySelector('.perf-table-container .position-content.active');
+        if (activePosition) {
+          const positionId = activePosition.id;
+          renderMetrics(positionId);
+        }
+        return;
+      }
+  
+      fetch(`locales/${language}.json`)
+        .then(response => {
+          // Don't throw an error, just return null if response is not OK
+          return response.ok ? response.json() : null;
+        })
+        .then(translations => {
+          // Only proceed if translations exist
+          if (translations) {
+            // Store translations globally
+            window.translations = translations;
+            
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+              const keys = element.getAttribute('data-i18n').split('.');
+              let value = translations;
+              for (const key of keys) {
+                if (value === undefined || value === null) break;
+                value = value[key];
+              }
+              if (value) {
+                if (element.tagName === 'META') {
+                element.setAttribute('content', value);
+            } else if (value.includes('<')) {
+                element.innerHTML = value;
+            } else {
+                element.textContent = value;
+            }          }
+            });
+            
+            // Re-render all visible metrics with new translations
+            const activePosition = document.querySelector('.perf-table-container .position-content.active');
+            if (activePosition) {
+              const positionId = activePosition.id;
+              renderMetrics(positionId);
+            }
+          }
+        })
+        .catch(() => {
+          // Completely empty catch block to silently ignore any errors
+        });
+    }
+    
+    const preferredLanguage = getPreferredLanguage();
+    applyLanguage(preferredLanguage);
+    
+      </script>
